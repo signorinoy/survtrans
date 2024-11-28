@@ -14,7 +14,10 @@ status](https://www.r-pkg.org/badges/version/survtrans)](https://CRAN.R-project.
 coverage](https://codecov.io/gh/SignorinoY/survtrans/graph/badge.svg)](https://app.codecov.io/gh/SignorinoY/survtrans)
 <!-- badges: end -->
 
-The goal of survtrans is to …
+The goal of survtrans is to provide a framework for transferring
+survival information from source domain(s) to target domain. The package
+now only supports the Cox proportional hazards model with global and
+local transfer learning.
 
 ## Installation
 
@@ -27,7 +30,9 @@ pak::pak("SignorinoY/survtrans")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to transfer survival
+information from multiple source domains to a target domain using the
+Cox proportional hazards model:
 
 ``` r
 library(survtrans)
