@@ -1,0 +1,31 @@
+url: http://gongziyang.com/survtrans/
+template:
+  bootstrap: 5
+
+reference:
+- title: "Fitting"
+  contents:
+  - coxtrans
+- title: "Inference"
+  contents:
+  - logLik.coxtrans
+  - BIC.coxtrans
+  - coef.coxtrans
+  - vcov.coxtrans
+  - summary.coxtrans
+  - print.summary.coxtrans
+- title: "Prediction"
+  contents:
+  - basehaz.coxtrans
+  - predict.coxtrans
+- title: Utils
+  contents:
+  - calc_lambda_max
+  - survtrans_control
+  - simsurv_tl
+- title: "Data Sets"
+  contents:
+  - sim2
+- title: internal
+  contents:
+  - basehaz

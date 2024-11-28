@@ -1,0 +1,65 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# survtrans
+
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![CRAN status](https://www.r-pkg.org/badges/version/survtrans)](https://CRAN.R-project.org/package=survtrans)
+[![R-CMD-check](https://github.com/SignorinoY/survtrans/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SignorinoY/survtrans/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/SignorinoY/survtrans/graph/badge.svg)](https://app.codecov.io/gh/SignorinoY/survtrans)
+<!-- badges: end -->
+
+The goal of survtrans is to ...
+
+## Installation
+
+You can install the development version of survtrans like so:
+
+```{r, eval = FALSE}
+# install.packages("pak")
+pak::pak("SignorinoY/survtrans")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(survtrans)
+formula <- survival::Surv(time, status) ~ . - group - id
+fit <- coxtrans(
+  formula, sim2, sim2$group,
+  lambda1 = 0.03, lambda2 = 0.01, lambda3 = 0.01, penalty = "SCAD"
+)
+summary(fit)
+```
+
+We can also give the estimated cumulative hazard function as follows:
+```{r, basehaz, fig.alt = "Estimated vs. True Cumulative Baseline Hazard Function"}
+library(ggplot2)
+basehaz_pred <- basehaz(fit)
+basehaz_pred$color <- as.numeric(basehaz_pred$strata) %% 2
+ggplot(basehaz_pred, aes(x = time, y = basehaz, group = strata, color = factor(color))) +
+  geom_line() +
+  geom_line(aes(x = time, y = time^2 / 2, color = "True"), linetype = "dotted") +
+  geom_line(aes(x = time, y = time^3 / 3, color = "True"), linetype = "dotted") +
+  labs(
+    title = "Cumulative Baseline Hazard Function (Esimtated vs. True)",
+    x = expression(t),
+    y = expression(Lambda[0](t))
+  ) +
+  guides(color = guide_legend(title = "Strata"))
+```
