@@ -198,7 +198,7 @@ coxtrans <- function(
     nu <- nu + vartheta * (contr_penalty %*% theta - alpha)
 
     r_norm <- norm(
-      rbind(contr_penalty %*% theta - alpha, contr_sum %*% theta), "2"
+      rbind(contr_sum %*% theta, contr_penalty %*% theta - alpha), "2"
     )
     s_norm <- norm(
       Matrix::crossprod(contr_penalty, alpha - alpha_old), "2"
@@ -207,16 +207,14 @@ coxtrans <- function(
     eps_pri <- sqrt(n_constraints) * control$abstol +
       control$reltol * pmax(
         norm(
-          rbind(contr_penalty %*% theta, contr_sum %*% theta), "2"
+          rbind(contr_sum %*% theta, contr_penalty %*% theta), "2"
         ),
         norm(alpha, "2")
       )
     eps_dual <- sqrt(n_parameters) * control$abstol +
       control$reltol * norm(
-        rbind(
-          Matrix::crossprod(contr_penalty, nu),
-          Matrix::crossprod(contr_sum, mu)
-        ), "2"
+        Matrix::crossprod(contr_sum, mu) + Matrix::crossprod(contr_penalty, nu),
+        "2"
       )
 
     # Update the penalty parameter
@@ -301,7 +299,7 @@ coxtrans <- function(
       for (k in 1:n_groups) {
         if (is_processed[k]) next
         pos <- pair_index(j, k, n_groups)
-        if (abs(alpha_local[i, pos]) < eps_pri) {
+        if (abs(alpha_local[i, pos]) < control$abstol) {
           eta_idx[i, k] <- j
           is_processed[k] <- TRUE
         }
@@ -314,9 +312,9 @@ coxtrans <- function(
   }
 
   # Handling the extreme small values to zero
-  eta[abs(eta) < eps_pri] <- 0
+  eta[abs(eta) < control$abstol] <- 0
   beta <- theta[, n_groups + 1]
-  beta[abs(beta) < eps_pri] <- 0
+  beta[abs(beta) < control$abstol] <- 0
 
   # Forcing beta satisfying sum(eta) = beta
   for (j in 1:n_features) {
