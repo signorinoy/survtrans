@@ -15,8 +15,10 @@
 #' default is "lasso". Other options are "MCP" and "SCAD".
 #' @param gamma A non-negative value specifying the penalty parameter. The
 #' default is 3.7 for SCAD and 3.0 for MCP.
-#' @param rho A value in (2, 10) specifying the expansion factor of the
-#' augmented Lagrangian's penalty parameter. The default is 2.0.
+#' @param rho A value larger than 1 specifying the increase/decrease factor
+#' for the augmented Lagrangian's penalty parameter. The default is 2.0.
+#' @param tau A value larger than 1 specifying the tolerance for the
+#' trade-off between the primal and dual residuals. The default is 10.0.
 #' @param init A numeric vector of initial values for the coefficients. The
 #' default is a zero vector.
 #' @param control An object of class \link{survtrans_control} containing control
@@ -41,7 +43,7 @@ coxtrans <- function(
       SCAD = 3.7,
       MCP = 3,
       1
-    ), rho = 2.0, init,
+    ), rho = 2.0, tau = 10.0, init,
     control, ...) {
   # Load the data
   data <- preprocess(formula, data, group = group)
@@ -218,8 +220,8 @@ coxtrans <- function(
       )
 
     # Update the penalty parameter
-    if (r_norm > 10 * s_norm) vartheta <- vartheta * rho
-    if (s_norm > 10 * r_norm) vartheta <- vartheta / rho
+    if (r_norm > tau * s_norm) vartheta <- vartheta * rho
+    if (s_norm > tau * r_norm) vartheta <- vartheta / rho
     vartheta <- min(max(vartheta, 1e-3), 2.118034)
 
     # Check the convergence

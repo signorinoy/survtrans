@@ -14,6 +14,7 @@ coxtrans(
   penalty = c("lasso", "MCP", "SCAD"),
   gamma = switch(penalty, SCAD = 3.7, MCP = 3, 1),
   rho = 2,
+  tau = 10,
   init,
   control,
   ...
@@ -43,8 +44,11 @@ default is "lasso". Other options are "MCP" and "SCAD".}
 \item{gamma}{A non-negative value specifying the penalty parameter. The
 default is 3.7 for SCAD and 3.0 for MCP.}
 
-\item{rho}{A value in (2, 10) specifying the expansion factor of the
-augmented Lagrangian's penalty parameter. The default is 2.0.}
+\item{rho}{A value larger than 1 specifying the increase/decrease factor
+for the augmented Lagrangian's penalty parameter. The default is 2.0.}
+
+\item{tau}{A value larger than 1 specifying the tolerance for the
+trade-off between the primal and dual residuals. The default is 10.0.}
 
 \item{init}{A numeric vector of initial values for the coefficients. The
 default is a zero vector.}
