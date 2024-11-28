@@ -36,3 +36,4 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 LazyData: true
+Config/usethis/last-upkeep: 2024-11-28

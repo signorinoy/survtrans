@@ -75,17 +75,18 @@ We can also give the estimated cumulative hazard function as follows:
 ``` r
 library(ggplot2)
 basehaz_pred <- basehaz(fit)
-basehaz_pred$color <- as.numeric(basehaz_pred$strata) %% 2
-ggplot(basehaz_pred, aes(x = time, y = basehaz, group = strata, color = factor(color))) +
+basehaz_pred$color <- ifelse(as.numeric(basehaz_pred$strata) %% 2 == 0, "Group 2", "Group 1")
+ggplot(basehaz_pred, aes(x = time, y = basehaz, group = strata, color = factor(color), linetype = "Estimates")) +
   geom_line() +
-  geom_line(aes(x = time, y = time^2 / 2, color = "True"), linetype = "dotted") +
-  geom_line(aes(x = time, y = time^3 / 3, color = "True"), linetype = "dotted") +
+  geom_line(aes(x = time, y = time^2 / 2, color = "Group 1", linetype = "True")) +
+  geom_line(aes(x = time, y = time^3 / 3, color = "Group 2", linetype = "True")) +
   labs(
-    title = "Cumulative Baseline Hazard Function (Esimtated vs. True)",
+    title = "Cumulative Baseline Hazard Function (Estimated vs. True)",
     x = expression(t),
     y = expression(Lambda[0](t))
   ) +
-  guides(color = guide_legend(title = "Strata"))
+  scale_linetype_manual(values = c("Estimates" = "dashed", "True" = "solid")) +
+  guides(color = guide_legend(title = "Strata"), linetype = guide_legend(title = "Line Type"))
 ```
 
 <img src="man/figures/README-basehaz-1.png" alt="Estimated vs. True Cumulative Baseline Hazard Function" width="100%" />

@@ -4,9 +4,9 @@
 \name{survtrans-package}
 \alias{survtrans}
 \alias{survtrans-package}
-\title{survtrans: What the Package Does (One Line, Title Case)}
+\title{survtrans: Transfer Learning for Survival Analysis}
 \description{
-What the package does (one paragraph).
+Transfer learning for survival analysis. This package provides a framework for transferring survival information from source domain(s) to target domain. The package now only supports the Cox proportional hazards model with global and local transfer learning.
 }
 \seealso{
 Useful links:
@@ -18,7 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Ziyang Gong \email{gongziyang@smail.swufe.edu.cn} (\href{https://orcid.org/0009-0001-4870-9102}{ORCID})
 
 }
 \keyword{internal}
