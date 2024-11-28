@@ -48,6 +48,7 @@
 <span>  penalty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lasso"</span>, <span class="st">"MCP"</span>, <span class="st">"SCAD"</span><span class="op">)</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">penalty</span>, SCAD <span class="op">=</span> <span class="fl">3.7</span>, MCP <span class="op">=</span> <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  rho <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  tau <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  <span class="va">init</span>,</span>
 <span>  <span class="va">control</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -98,8 +99,13 @@ default is 3.7 for SCAD and 3.0 for MCP.</p></dd>
 
 
 <dt id="arg-rho">rho<a class="anchor" aria-label="anchor" href="#arg-rho"></a></dt>
-<dd><p>A value in (2, 10) specifying the expansion factor of the
-augmented Lagrangian's penalty parameter. The default is 2.0.</p></dd>
+<dd><p>A value larger than 1 specifying the increase/decrease factor
+for the augmented Lagrangian's penalty parameter. The default is 2.0.</p></dd>
+
+
+<dt id="arg-tau">tau<a class="anchor" aria-label="anchor" href="#arg-tau"></a></dt>
+<dd><p>A value larger than 1 specifying the tolerance for the
+trade-off between the primal and dual residuals. The default is 10.0.</p></dd>
 
 
 <dt id="arg-init">init<a class="anchor" aria-label="anchor" href="#arg-init"></a></dt>
