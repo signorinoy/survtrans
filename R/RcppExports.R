@@ -9,6 +9,10 @@ calc_grad_hess <- function(lp, x, time, status) {
     .Call(`_survtrans_calc_grad_hess`, lp, x, time, status)
 }
 
+close_update <- function(z, v, penalty, lambda, gamma) {
+    .Call(`_survtrans_close_update`, z, v, penalty, lambda, gamma)
+}
+
 threshold_prox <- function(y, vartheta, penalty, lambda, gamma) {
     .Call(`_survtrans_threshold_prox`, y, vartheta, penalty, lambda, gamma)
 }

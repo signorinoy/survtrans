@@ -38,6 +38,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// close_update
+arma::vec close_update(const arma::vec& z, const arma::vec& v, std::string penalty, double lambda, double gamma);
+RcppExport SEXP _survtrans_close_update(SEXP zSEXP, SEXP vSEXP, SEXP penaltySEXP, SEXP lambdaSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type z(zSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< std::string >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    rcpp_result_gen = Rcpp::wrap(close_update(z, v, penalty, lambda, gamma));
+    return rcpp_result_gen;
+END_RCPP
+}
 // threshold_prox
 arma::vec threshold_prox(const arma::vec& y, double vartheta, std::string penalty, double lambda, double gamma);
 RcppExport SEXP _survtrans_threshold_prox(SEXP ySEXP, SEXP varthetaSEXP, SEXP penaltySEXP, SEXP lambdaSEXP, SEXP gammaSEXP) {
@@ -57,6 +72,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_survtrans_approx_likelihood", (DL_FUNC) &_survtrans_approx_likelihood, 3},
     {"_survtrans_calc_grad_hess", (DL_FUNC) &_survtrans_calc_grad_hess, 4},
+    {"_survtrans_close_update", (DL_FUNC) &_survtrans_close_update, 5},
     {"_survtrans_threshold_prox", (DL_FUNC) &_survtrans_threshold_prox, 5},
     {NULL, NULL, 0}
 };

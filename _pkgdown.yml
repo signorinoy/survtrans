@@ -23,6 +23,10 @@ reference:
   - calc_lambda_max
   - survtrans_control
   - simsurv_tl
+  - ncvcox
+  - cv.ncvcox
+  - coef.cv.ncvcox
+  - logLik.ncvcox
 - title: "Data Sets"
   contents:
   - sim2

@@ -351,7 +351,7 @@ coxtrans <- function(
   # Return the fitted model
   fit <- list(
     coefficients = coefficients,
-    logLik = -loss,
+    logLik = loss,
     iter = n_iterations,
     message = message,
     history = history,
