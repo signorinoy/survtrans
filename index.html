@@ -78,23 +78,23 @@
 <span><span class="co">#&gt;   n=500, number of events=422</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;               coef exp(coef) se(coef)      z Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; X1 (1)     0.34791   1.41611  0.05130  6.781 1.19e-11 ***</span></span>
-<span><span class="co">#&gt; X1 (2, 4)  0.94904   2.58322  0.08576 11.066  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; X1 (3, 5) -0.25321   0.77630  0.06888 -3.676 0.000237 ***</span></span>
-<span><span class="co">#&gt; X2 (1)     0.36098   1.43474  0.05370  6.723 1.78e-11 ***</span></span>
-<span><span class="co">#&gt; X2 (2, 4)  0.96454   2.62358  0.08449 11.415  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; X2 (3, 5) -0.24257   0.78461  0.08020 -3.025 0.002490 ** </span></span>
+<span><span class="co">#&gt; X1 (1)     0.34792   1.41612  0.05130  6.781 1.19e-11 ***</span></span>
+<span><span class="co">#&gt; X1 (2, 4)  0.94905   2.58324  0.08576 11.066  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; X1 (3, 5) -0.25320   0.77631  0.06888 -3.676 0.000237 ***</span></span>
+<span><span class="co">#&gt; X2 (1)     0.36097   1.43472  0.05370  6.722 1.79e-11 ***</span></span>
+<span><span class="co">#&gt; X2 (2, 4)  0.96453   2.62354  0.08449 11.415  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; X2 (3, 5) -0.24258   0.78460  0.08020 -3.025 0.002488 ** </span></span>
 <span><span class="co">#&gt; X3 (ALL)   0.34501   1.41200  0.05541  6.227 4.76e-10 ***</span></span>
 <span><span class="co">#&gt; X4 (ALL)   0.32763   1.38767  0.05335  6.141 8.22e-10 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt;           exp(coef) exp(-coef) lower .95 upper .95</span></span>
 <span><span class="co">#&gt; X1 (1)    1.4161    0.7062     1.2806    1.5659   </span></span>
-<span><span class="co">#&gt; X1 (2, 4) 2.5832    0.3871     2.1835    3.0561   </span></span>
-<span><span class="co">#&gt; X1 (3, 5) 0.7763    1.2882     0.6783    0.8885   </span></span>
+<span><span class="co">#&gt; X1 (2, 4) 2.5832    0.3871     2.1836    3.0561   </span></span>
+<span><span class="co">#&gt; X1 (3, 5) 0.7763    1.2881     0.6783    0.8885   </span></span>
 <span><span class="co">#&gt; X2 (1)    1.4347    0.6970     1.2914    1.5940   </span></span>
-<span><span class="co">#&gt; X2 (2, 4) 2.6236    0.3812     2.2232    3.0961   </span></span>
-<span><span class="co">#&gt; X2 (3, 5) 0.7846    1.2745     0.6705    0.9182   </span></span>
+<span><span class="co">#&gt; X2 (2, 4) 2.6235    0.3812     2.2231    3.0961   </span></span>
+<span><span class="co">#&gt; X2 (3, 5) 0.7846    1.2745     0.6705    0.9181   </span></span>
 <span><span class="co">#&gt; X3 (ALL)  1.4120    0.7082     1.2667    1.5740   </span></span>
 <span><span class="co">#&gt; X4 (ALL)  1.3877    0.7206     1.2499    1.5406</span></span></code></pre></div>
 <p>We can also give the estimated cumulative hazard function as follows:</p>
@@ -112,7 +112,7 @@
 <span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">Lambda</span><span class="op">[</span><span class="fl">0</span><span class="op">]</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Estimates"</span> <span class="op">=</span> <span class="st">"dashed"</span>, <span class="st">"True"</span> <span class="op">=</span> <span class="st">"solid"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Strata"</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Line Type"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Strata"</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Type"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-basehaz-1.png" alt="Estimated vs. True Cumulative Baseline Hazard Function" width="100%"></p>
 </div>
 </div>
