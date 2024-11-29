@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-11-29T05:50Z
+last_built: 2024-11-29T18:00Z
 urls:
   reference: http://gongziyang.com/survtrans/reference
   article: http://gongziyang.com/survtrans/articles

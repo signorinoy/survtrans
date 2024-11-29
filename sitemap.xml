@@ -12,9 +12,13 @@
 <url><loc>http://gongziyang.com/survtrans/reference/basehaz.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/calc_lambda_max.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/coef.coxtrans.html</loc></url>
+<url><loc>http://gongziyang.com/survtrans/reference/coef.cv.ncvcox.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/coxtrans.html</loc></url>
+<url><loc>http://gongziyang.com/survtrans/reference/cv.ncvcox.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/index.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/logLik.coxtrans.html</loc></url>
+<url><loc>http://gongziyang.com/survtrans/reference/logLik.ncvcox.html</loc></url>
+<url><loc>http://gongziyang.com/survtrans/reference/ncvcox.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/predict.coxtrans.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/print.summary.coxtrans.html</loc></url>
 <url><loc>http://gongziyang.com/survtrans/reference/sim2.html</loc></url>
