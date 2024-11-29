@@ -251,10 +251,9 @@ coxtrans <- function(
       )
     }
 
-    alpha_ <- contr_penalty %*% theta
-    loss_penalty <- penalty(alpha_[sparse_idx], penalty, lambda1, gamma) +
-      penalty(alpha_[global_idx], penalty, lambda2, gamma) +
-      penalty(alpha_[local_idx], penalty, lambda3, gamma)
+    loss_penalty <- penalty(alpha[sparse_idx], penalty, lambda1, gamma) +
+      penalty(alpha[global_idx], penalty, lambda2, gamma) +
+      penalty(alpha[local_idx], penalty, lambda3, gamma)
     loss_penalty <- loss_penalty * n_samples_total
     loss_total <- loss + loss_penalty
 
@@ -262,8 +261,8 @@ coxtrans <- function(
       cat(
         "========================================\n",
         sprintf("Iteration Number       : %d", n_iterations), "\n",
-        sprintf("Residuals (r, s)       : %.4f, %.4f", r_norm, s_norm), "\n",
-        sprintf("Epsilon (r, s)         : %.4f, %.4f", eps_pri, eps_dual), "\n",
+        sprintf("Residuals (pri, dual)  : %.4f, %.4f", r_norm, s_norm), "\n",
+        sprintf("Epsilon (pri, dual)    : %.4f, %.4f", eps_pri, eps_dual), "\n",
         sprintf("Augmented Parameter    : %.4f", vartheta), "\n",
         sprintf("Total Loss             : %.4f", loss_total), "\n",
         sprintf(" - Log Likelihood      : %.4f", loss), "\n",
