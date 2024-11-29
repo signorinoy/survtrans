@@ -138,6 +138,7 @@ coxtrans <- function(
 
   contr_sum2 <- Matrix::crossprod(contr_sum)
   contr_penalty2 <- Matrix::crossprod(contr_penalty)
+  contr2 <- contr_sum2 + contr_penalty2
 
   sparse_idx <- 1:(n_groups * n_features)
   global_idx <- (n_groups * n_features + 1):(2 * n_groups * n_features)
@@ -176,7 +177,7 @@ coxtrans <- function(
     # Update the coefficients
     xwx <- Matrix::crossprod(x_tilde, w * x_tilde) / n_samples_total
     xwz <- Matrix::crossprod(x_tilde, w * z) / n_samples_total
-    lhs <- xwx + vartheta * (contr_sum2 + contr_penalty2)
+    lhs <- xwx + vartheta * contr2
     rhs <- xwz - Matrix::crossprod(contr_sum, mu) +
       vartheta * Matrix::crossprod(contr_penalty, alpha - nu / vartheta)
     theta <- Matrix::solve(lhs, rhs, sparse = TRUE, tol = 1e-6)
@@ -216,11 +217,6 @@ coxtrans <- function(
         Matrix::crossprod(contr_sum, mu) + Matrix::crossprod(contr_penalty, nu),
         "2"
       )
-
-    # Update the penalty parameter
-    if (r_norm > tau * s_norm) vartheta <- vartheta * rho
-    if (s_norm > tau * r_norm) vartheta <- vartheta / rho
-    vartheta <- min(max(vartheta, 1e-3), 2.118034)
 
     # Check the convergence
     if (n_iterations >= control$maxit) {
@@ -284,6 +280,11 @@ coxtrans <- function(
     )
 
     if (convergence) break
+
+    # Update the penalty parameter
+    if (r_norm > tau * s_norm) vartheta <- vartheta * rho
+    if (s_norm > tau * r_norm) vartheta <- vartheta / rho
+    vartheta <- min(max(vartheta, 1e-3), 2.118034)
   }
 
   alpha_local <- matrix(alpha[local_idx, 1], nrow = n_features)
