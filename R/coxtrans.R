@@ -199,22 +199,27 @@ coxtrans <- function(
     nu <- nu + vartheta * (contr_penalty %*% theta - alpha)
 
     r_norm <- norm(
-      rbind(contr_sum %*% theta, contr_penalty %*% theta - alpha), "2"
+      as.matrix(
+        rbind(contr_sum %*% theta, contr_penalty %*% theta - alpha)
+      ), "2"
     )
     s_norm <- norm(
-      Matrix::crossprod(contr_penalty, alpha - alpha_old), "2"
+      as.matrix(Matrix::crossprod(contr_penalty, alpha - alpha_old)), "2"
     ) * vartheta
 
     eps_pri <- sqrt(n_constraints) * control$abstol +
       control$reltol * pmax(
         norm(
-          rbind(contr_sum %*% theta, contr_penalty %*% theta), "2"
+          as.matrix(rbind(contr_sum %*% theta, contr_penalty %*% theta)), "2"
         ),
-        norm(alpha, "2")
+        norm(as.matrix(alpha), "2")
       )
     eps_dual <- sqrt(n_parameters) * control$abstol +
       control$reltol * norm(
-        Matrix::crossprod(contr_sum, mu) + Matrix::crossprod(contr_penalty, nu),
+        as.matrix(
+          Matrix::crossprod(contr_sum, mu) +
+            Matrix::crossprod(contr_penalty, nu)
+        ),
         "2"
       )
 
@@ -242,20 +247,21 @@ coxtrans <- function(
       risk_set[idx] <- cumsum(hazard[idx])
       risk_set[idx] <- stats::ave(risk_set[idx], time_tilde[idx], FUN = max)
     }
-    loss <- -sum(status_tilde * (offset - log(risk_set)))
-    if (-loss / null_deviance < 0.01) {
+    loss <- sum(status_tilde * (offset - log(risk_set)))
+    if (loss / null_deviance < 0.01) {
       convergence <- TRUE
       message <- paste0(
-        "The log-likelihood is too small (", -loss / null_deviance,
+        "The log-likelihood is too small (", loss / null_deviance,
         "). Stopping the algorithm."
       )
     }
 
-    loss_penalty <- penalty(alpha[sparse_idx], penalty, lambda1, gamma) +
-      penalty(alpha[global_idx], penalty, lambda2, gamma) +
-      penalty(alpha[local_idx], penalty, lambda3, gamma)
+    alpha_ <- contr_penalty %*% theta
+    loss_penalty <- penalty(alpha_[sparse_idx], penalty, lambda1, gamma) +
+      penalty(alpha_[global_idx], penalty, lambda2, gamma) +
+      penalty(alpha_[local_idx], penalty, lambda3, gamma)
     loss_penalty <- loss_penalty * n_samples_total
-    loss_total <- loss + loss_penalty
+    loss_total <- loss - loss_penalty
 
     if (control$verbose) {
       cat(
@@ -286,10 +292,11 @@ coxtrans <- function(
     vartheta <- min(max(vartheta, 1e-3), 2.118034)
   }
 
-  theta_eps <- Matrix::norm(
+  theta_ <- theta
+  eps_theta <- Matrix::norm(
     Matrix::crossprod(contr_penalty, alpha - alpha_old), "I"
   )
-  alpha_eps <- Matrix::norm(alpha - alpha_old, "I")
+  eps_alpha <- Matrix::norm(alpha - alpha_old, "I")
   alpha_local <- matrix(alpha[local_idx, 1], nrow = n_features)
   theta <- matrix(theta, nrow = n_features, ncol = n_groups + 1)
   eta <- matrix(0, nrow = n_features, ncol = n_groups)
@@ -303,7 +310,7 @@ coxtrans <- function(
       for (k in 1:n_groups) {
         if (is_processed[k]) next
         pos <- pair_index(j, k, n_groups)
-        if (abs(alpha_local[i, pos]) < alpha_eps) {
+        if (abs(alpha_local[i, pos]) < eps_alpha) {
           eta_idx[i, k] <- j
           is_processed[k] <- TRUE
         }
@@ -316,15 +323,17 @@ coxtrans <- function(
   }
 
   # Handling the extreme small values to zero
-  eta[abs(eta) < theta_eps] <- 0
+  eta[abs(eta) < eps_theta] <- 0
   beta <- theta[, n_groups + 1]
-  beta[abs(beta) < theta_eps] <- 0
+  beta[abs(beta) < eps_theta] <- 0
 
-  # Forcing beta satisfying sum(eta) = beta
+  # Forcing beta satisfying sum(eta) = 0
   for (j in 1:n_features) {
     idx <- which(eta[j, ] != 0)
     if (length(idx) == 0) next
-    eta[j, idx] <- eta[j, idx] - mean(eta[j, idx])
+    eta_mean <- mean(eta[j, idx])
+    eta[j, idx] <- eta[j, idx] - eta_mean
+    beta[j] <- beta[j] + eta_mean
   }
 
   # Unscale the coefficients
@@ -356,7 +365,9 @@ coxtrans <- function(
     time = time,
     status = status,
     group = group,
-    x = x
+    x = x,
+    theta = theta_,
+    alpha = alpha
   )
   class(fit) <- "coxtrans"
   return(fit)
