@@ -286,6 +286,10 @@ coxtrans <- function(
     vartheta <- min(max(vartheta, 1e-3), 2.118034)
   }
 
+  theta_eps <- Matrix::norm(
+    Matrix::crossprod(contr_penalty, alpha - alpha_old), "I"
+  )
+  alpha_eps <- Matrix::norm(alpha - alpha_old, "I")
   alpha_local <- matrix(alpha[local_idx, 1], nrow = n_features)
   theta <- matrix(theta, nrow = n_features, ncol = n_groups + 1)
   eta <- matrix(0, nrow = n_features, ncol = n_groups)
@@ -299,7 +303,7 @@ coxtrans <- function(
       for (k in 1:n_groups) {
         if (is_processed[k]) next
         pos <- pair_index(j, k, n_groups)
-        if (abs(alpha_local[i, pos]) < control$abstol) {
+        if (abs(alpha_local[i, pos]) < alpha_eps) {
           eta_idx[i, k] <- j
           is_processed[k] <- TRUE
         }
@@ -312,9 +316,9 @@ coxtrans <- function(
   }
 
   # Handling the extreme small values to zero
-  eta[abs(eta) < control$abstol] <- 0
+  eta[abs(eta) < theta_eps] <- 0
   beta <- theta[, n_groups + 1]
-  beta[abs(beta) < control$abstol] <- 0
+  beta[abs(beta) < theta_eps] <- 0
 
   # Forcing beta satisfying sum(eta) = beta
   for (j in 1:n_features) {
