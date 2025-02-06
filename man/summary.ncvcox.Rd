@@ -4,13 +4,16 @@
 \alias{summary.ncvcox}
 \title{Summary method for a \code{ncvcox} object}
 \usage{
-\method{summary}{ncvcox}(object, conf.int = 0.95, ...)
+\method{summary}{ncvcox}(object, conf.int = 0.95, compressed = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{ncvcox}.}
 
 \item{conf.int}{A numeric value between 0 and 1 indicating the confidence
 level of the confidence interval. Default is 0.95.}
+
+\item{compressed}{Logical; if \code{TRUE}, the summary is compressed and
+only includes the group-level coefficients. Default is \code{TRUE}.}
 
 \item{...}{Additional arguments (not used).}
 }

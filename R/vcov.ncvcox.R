@@ -18,7 +18,7 @@ vcov.ncvcox <- function(object, ...) {
 
   # Select the non-zero coefficients and corresponding variables
   coefs <- coefficients[coefficients != 0]
-  x <- x[, coefficients != 0]
+  x <- as.matrix(x[, coefficients != 0, drop = FALSE])
   n_nonzero <- length(coefs)
 
   # Calculate the gradient and Hessian for the non-zero coefficients
@@ -27,7 +27,9 @@ vcov.ncvcox <- function(object, ...) {
   hessians <- matrix(0, nrow = n_samples, ncol = n_nonzero^2)
   for (k in 1:n_groups) {
     idx <- group_idxs[[k]]
-    ghs <- calc_grad_hess(lp[idx], x[idx, ], time[idx], status[idx])
+    ghs <- calc_grad_hess(
+      lp[idx], x[idx, , drop = FALSE], time[idx], status[idx]
+    )
     gradients[idx, ] <- ghs$grad
     hessians[idx, ] <- ghs$hess
   }

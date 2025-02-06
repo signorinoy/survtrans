@@ -3,6 +3,8 @@
 #' @param object An object of class \code{ncvcox}.
 #' @param conf.int A numeric value between 0 and 1 indicating the confidence
 #' level of the confidence interval. Default is 0.95.
+#' @param compressed Logical; if \code{TRUE}, the summary is compressed and
+#' only includes the group-level coefficients. Default is \code{TRUE}.
 #' @param ... Additional arguments (not used).
 #'
 #' @return An object of class \code{summary.ncvcox}, with the following
@@ -18,7 +20,7 @@
 #' the confidence limits for exp(coef).}
 #'
 #' @export
-summary.ncvcox <- function(object, conf.int = 0.95, ...) {
+summary.ncvcox <- function(object, conf.int = 0.95, compressed = TRUE, ...) {
   # Extract necessary components from the object
   n_samples <- nrow(object$x)
   n_events <- sum(object$status)
@@ -54,6 +56,30 @@ summary.ncvcox <- function(object, conf.int = 0.95, ...) {
       paste("upper .", round(100 * conf.int, 2), sep = "")
     )
   )
+
+  if (!compressed) {
+    coef_matrix_extract <- coef_matrix
+    conf_int_matrix_extract <- conf_int_matrix
+
+    coef_names <- names(coefficients)
+    variable_names <- colnames(object$x)
+    missing_names <- setdiff(variable_names, coef_names)
+
+    if (length(missing_names) > 0) {
+      for (name in missing_names) {
+        coef_matrix_extract <- rbind(coef_matrix_extract, c(NA, NA, NA, NA, NA))
+        conf_int_matrix_extract <- rbind(
+          conf_int_matrix_extract, c(NA, NA, NA, NA)
+        )
+        coef_names <- c(coef_names, name)
+      }
+    }
+    coef_order <- match(variable_names, coef_names)
+    coef_matrix <- coef_matrix_extract[coef_order, ]
+    conf_int_matrix <- conf_int_matrix_extract[coef_order, ]
+    rownames(coef_matrix) <- variable_names
+    rownames(conf_int_matrix) <- variable_names
+  }
 
   # Create a summary list
   summary_list <- list(
