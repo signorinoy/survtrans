@@ -23,6 +23,7 @@
 #' formula <- survival::Surv(time, status) ~ . - group - id
 #' df <- sim2[sim2$group == 2 | sim2$group == 4, ]
 #' fit <- ncvcox(formula, df, df$group, lambda = 0.1, penalty = "SCAD")
+#' summary(fit)
 ncvcox <- function(
     formula, data, group, lambda = 0,
     penalty = c("lasso", "MCP", "SCAD"),
@@ -76,7 +77,7 @@ ncvcox <- function(
 
   offset <- x %*% beta
   w <- numeric(n_samples)
-  z <- numeric(n_samples)
+  r <- numeric(n_samples)
 
   x2 <- x**2
 
@@ -91,7 +92,7 @@ ncvcox <- function(
         offset = offset[idx], time = time[idx], status = status[idx]
       )
       w[idx] <- wls$weights
-      z[idx] <- wls$residuals + offset[idx]
+      r[idx] <- wls$residuals
     }
     xw <- x * w
     xwx <- colMeans(x2 * w)
@@ -101,13 +102,13 @@ ncvcox <- function(
       max_diff <- 0
       for (j in seq_len(n_features)) {
         beta_j <- beta[j]
-        r <- z - x[, -j, drop = FALSE] %*% beta[-j]
-        beta[j] <- close_update(
-          mean(xw[, j] * r), xwx[j], penalty, lambda, gamma
-        )
-        delta_beta <- beta[j] - beta_j
-        if (delta_beta != 0) {
-          max_diff <- max(max_diff, abs(delta_beta))
+        u <- mean(xw[, j] * r) + xwx[j] * beta_j
+        v <- xwx[j]
+        beta[j] <- close_update(u, v, penalty, lambda, gamma)
+        shift <- beta[j] - beta_j
+        if (shift != 0) {
+          r <- r - x[, j] * shift
+          max_diff <- max(max_diff, abs(shift) * sqrt(v))
         }
       }
       if (max_diff <= control$abstol) break

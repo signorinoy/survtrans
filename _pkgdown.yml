@@ -24,9 +24,13 @@ reference:
   - survtrans_control
   - simsurv_tl
   - ncvcox
-  - cv.ncvcox
-  - coef.cv.ncvcox
   - logLik.ncvcox
+  - BIC.ncvcox
+  - coef.ncvcox
+  - vcov.ncvcox
+  - summary.ncvcox
+  - print.summary.ncvcox
+  - basehaz.ncvcox
 - title: "Data Sets"
   contents:
   - sim2

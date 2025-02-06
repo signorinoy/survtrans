@@ -17,6 +17,7 @@ vcov.coxtrans <- function(object, ...) {
   group_idxs <- lapply(group_levels, function(g) which(group == g))
   n_samples_group <- sapply(group_idxs, length)
   coefficients <- object$coefficients
+  coefficients <- sweep(coefficients, 1, attr(x, "scale"), "*")
 
   # Extract the coefficients from the object
   eta <- coefficients[, 1:n_groups]

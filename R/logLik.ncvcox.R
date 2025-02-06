@@ -14,7 +14,7 @@ logLik.ncvcox <- function(object, ...) {
   n_groups <- length(unique(group))
   group_levels <- levels(group)
   group_idxs <- lapply(group_levels, function(g) which(group == g))
-  coefficients <- object$coefficients
+  coefficients <- object$coefficients * attr(x, "scale")
 
   # Calculate the log-likelihood
   offset <- x %*% coefficients

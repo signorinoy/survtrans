@@ -22,23 +22,11 @@ predict.coxtrans <- function(
     type = c("lp", "terms", "risk", "expected", "survival"), ...) {
   type <- match.arg(type)
   x <- stats::model.matrix(object$formula, newdata)[, -1]
-  group <- factor(newgroup, levels = levels(object$group))
 
   # Properties of the coxtrans object
-  group_levels <- levels(object$group)
-  n_groups <- length(unique(object$group))
-  coefficients <- object$coefficients
-  coefficients <- sweep(coefficients, 1, attr(x, "scale"), "*")
+  coefficients <- object$coefficients * attr(x, "scale")
 
-  beta <- coefficients[, 1:n_groups] + coefficients[, (n_groups + 1)]
-
-  lp <- numeric(nrow(x))
-  for (k in seq_len(n_groups)) {
-    idx <- which(group == group_levels[k])
-    if (length(idx) > 0) {
-      lp[idx] <- x[idx, ] %*% beta[, k]
-    }
-  }
+  lp <- x %*% coefficients
 
   if (type == "lp") {
     return(lp)
