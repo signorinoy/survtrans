@@ -17,7 +17,7 @@
 #' @param ... Additional arguments (not unused).
 #' @return A numeric vector of predictions.
 #' @export
-predict.coxtrans <- function(
+predict.ncvcox <- function(
     object, newdata = NULL, newgroup = NULL,
     type = c("lp", "terms", "risk", "expected", "survival"), ...) {
   type <- match.arg(type)

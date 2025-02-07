@@ -323,6 +323,7 @@ coxtrans <- function(
   }
 
   # Handling the extreme small values to zero
+  eps_theta <- max(eps_theta, control$abstol)
   eta[abs(eta) < eps_theta] <- 0
   beta <- theta[, n_groups + 1]
   beta[abs(beta) < eps_theta] <- 0

@@ -28,7 +28,7 @@ predict.coxtrans <- function(
   group_levels <- levels(object$group)
   n_groups <- length(unique(object$group))
   coefficients <- object$coefficients
-  coefficients <- sweep(coefficients, 1, attr(x, "scale"), "*")
+  coefficients <- sweep(coefficients, 1, attr(object$x, "scale"), "*")
 
   beta <- coefficients[, 1:n_groups] + coefficients[, (n_groups + 1)]
 
