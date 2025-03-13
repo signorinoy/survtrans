@@ -4,12 +4,7 @@
 \alias{survtrans_control}
 \title{Ancillary arguments for controlling survtrans fitting}
 \usage{
-survtrans_control(
-  abstol = 1e-04,
-  reltol = 0.001,
-  maxit = 1000,
-  verbose = FALSE
-)
+survtrans_control(abstol = 1e-04, reltol = 0.001, maxit = 300, verbose = FALSE)
 }
 \arguments{
 \item{abstol}{the absolute tolerance for the proposed algorithm.
@@ -19,7 +14,7 @@ Default is 1e-4.}
 Default is 1e-3.}
 
 \item{maxit}{the maximum number of iterations for the proposed algorithm.
-Default is 1000.}
+Default is 300.}
 
 \item{verbose}{a logical value indicating whether to print messages
 during the fitting process. Default is \code{FALSE}.}

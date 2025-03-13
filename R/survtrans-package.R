@@ -2,6 +2,12 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom graphics axis
+#' @importFrom graphics grid
+#' @importFrom graphics legend
+#' @importFrom graphics lines
+#' @importFrom graphics mtext
+#' @importFrom graphics par
 #' @importFrom lifecycle deprecated
 #' @importFrom Rcpp sourceCpp
 #' @importFrom stats BIC

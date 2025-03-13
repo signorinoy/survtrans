@@ -1,0 +1,54 @@
+---
+title: "A Review of Transfer Learning Approaches for Survival Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(survtrans)
+```
+
+
+
+# Introduction
+
+Consider a scenario where we have survival data from multiple source domains and we want to transfer the survival information to a target domain. In this vignette, we will review the transfer learning approaches for survival analysis.
+
+```{r formula}
+formula <- survival::Surv(time, status) ~ . - group - id
+df_target <- sim2[sim2$group == 1, ]
+```
+
+# Target Learning
+
+```{r target-learning}
+fit_target <- ncvcox(formula, df_target, lambda = 0.2, penalty = "SCAD")
+basehaz_target <- basehaz(fit_target)
+summary(fit_target)
+```
+
+# Global Learning
+
+```{r global-learning}
+fit_global <- ncvcox(formula, sim2, lambda = 0.1, penalty = "SCAD")
+basehaz_global <- basehaz(fit_global)
+summary(fit_global)
+```
+
+## Stratified Learning
+
+```{r stratified-learning}
+fit_strat <- ncvcox(formula, sim2, sim2$group, lambda = 0.1, penalty = "SCAD")
+basehaz_strat <- basehaz(fit_strat)
+summary(fit_strat)
+```

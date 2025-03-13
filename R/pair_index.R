@@ -15,5 +15,5 @@ pair_index <- function(i, j, s) {
   } else {
     pos <- (i - 1) * (2 * s - i) / 2 + (j - i)
   }
-  return(pos)
+  pos
 }

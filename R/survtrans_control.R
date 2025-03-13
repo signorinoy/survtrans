@@ -4,11 +4,11 @@
 #' @param reltol the relative tolerance for the proposed algorithm.
 #' Default is 1e-3.
 #' @param maxit the maximum number of iterations for the proposed algorithm.
-#'  Default is 1000.
+#'  Default is 300.
 #' @param verbose a logical value indicating whether to print messages
 #'  during the fitting process. Default is \code{FALSE}.
 survtrans_control <- function(
-    abstol = 1e-4, reltol = 1e-3, maxit = 1000, verbose = FALSE) {
+    abstol = 1e-4, reltol = 1e-3, maxit = 300, verbose = FALSE) {
   if (abstol <= 0) stop("Invalid absolute tolerance")
   if (reltol <= 0) stop("Invalid relative tolerance")
   if (maxit < 0) stop("Invalid value for iterations")

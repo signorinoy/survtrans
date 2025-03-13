@@ -41,8 +41,8 @@ This is a basic example which shows you how to transfer survival information fro
 library(survtrans)
 formula <- survival::Surv(time, status) ~ . - group - id
 fit <- coxtrans(
-  formula, sim2, sim2$group,
-  lambda1 = 0.03, lambda2 = 0.01, lambda3 = 0.01, penalty = "SCAD"
+  formula, sim2, sim2$group, 1,
+  lambda1 = 0.075, lambda2 = 0.08, alpha = 0.5, penalty = "SCAD"
 )
 summary(fit)
 ```
