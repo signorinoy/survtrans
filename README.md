@@ -39,12 +39,12 @@ library(survtrans)
 formula <- survival::Surv(time, status) ~ . - group - id
 fit <- coxtrans(
   formula, sim2, sim2$group, 1,
-  lambda1 = 0.075, lambda2 = 0.08, alpha = 0.5, penalty = "SCAD"
+  lambda1 = 0.075, lambda2 = 0.04, lambda3 = 0.04, penalty = "SCAD"
 )
 summary(fit)
 #> Call:
 #> coxtrans(formula = formula, data = sim2, group = sim2$group, 
-#>     target = 1, lambda1 = 0.075, lambda2 = 0.08, alpha = 0.5, 
+#>     target = 1, lambda1 = 0.075, lambda2 = 0.04, lambda3 = 0.04, 
 #>     penalty = "SCAD")
 #> 
 #>   n=500, number of events=422

@@ -11,7 +11,7 @@ coxtrans(
   target,
   lambda1 = 0,
   lambda2 = 0,
-  alpha = 1,
+  lambda3 = 0,
   penalty = c("lasso", "MCP", "SCAD"),
   gamma = switch(penalty, SCAD = 3.7, MCP = 3, 1),
   rho = 2,
@@ -35,11 +35,11 @@ as returned by the Surv function.}
 \item{lambda1}{A non-negative value specifying the sparse penalty parameter.
 The default is 0.}
 
-\item{lambda2}{A non-negative value specifying the biased penalty
+\item{lambda2}{A non-negative value specifying the global biased penalty
 parameter. The default is 0.}
 
-\item{alpha}{A value between 0 and 1 specifying the degree of the local and
-global shrinkage. The default is 1, which means no global shrinkage.}
+\item{lambda3}{A non-negative value specifying the local biased penalty
+parameter. The default is 0.}
 
 \item{penalty}{A character string specifying the penalty function. The
 default is "lasso". Other options are "MCP" and "SCAD".}
@@ -72,7 +72,7 @@ Transfer Learning for Cox Model with Global and Local Shrinkage
 formula <- survival::Surv(time, status) ~ . - group - id
 fit <- coxtrans(
   formula, sim2, sim2$group, 1,
-  lambda1 = 0.075, lambda2 = 0.08, alpha = 0.5, penalty = "SCAD"
+  lambda1 = 0.075, lambda2 = 0.04, lambda3 = 0.04, penalty = "SCAD"
 )
 summary(fit)
 }

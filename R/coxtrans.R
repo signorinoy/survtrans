@@ -8,10 +8,10 @@
 #' @param target A character string specifying the target group.
 #' @param lambda1 A non-negative value specifying the sparse penalty parameter.
 #' The default is 0.
-#' @param lambda2 A non-negative value specifying the biased penalty
+#' @param lambda2 A non-negative value specifying the global biased penalty
 #' parameter. The default is 0.
-#' @param alpha A value between 0 and 1 specifying the degree of the local and
-#' global shrinkage. The default is 1, which means no global shrinkage.
+#' @param lambda3 A non-negative value specifying the local biased penalty
+#' parameter. The default is 0.
 #' @param penalty A character string specifying the penalty function. The
 #' default is "lasso". Other options are "MCP" and "SCAD".
 #' @param gamma A non-negative value specifying the penalty parameter. The
@@ -34,12 +34,12 @@
 #' formula <- survival::Surv(time, status) ~ . - group - id
 #' fit <- coxtrans(
 #'   formula, sim2, sim2$group, 1,
-#'   lambda1 = 0.075, lambda2 = 0.08, alpha = 0.5, penalty = "SCAD"
+#'   lambda1 = 0.075, lambda2 = 0.04, lambda3 = 0.04, penalty = "SCAD"
 #' )
 #' summary(fit)
 coxtrans <- function(
     formula, data, group, target,
-    lambda1 = 0.0, lambda2 = 0.0, alpha = 1.0,
+    lambda1 = 0.0, lambda2 = 0.0, lambda3 = 0.0,
     penalty = c("lasso", "MCP", "SCAD"),
     gamma = switch(penalty,
       SCAD = 3.7,
@@ -76,8 +76,9 @@ coxtrans <- function(
   null_deviance <- -sum(status * log(risk_set_size))
 
   ## Check the input arguments
-  if (lambda1 < 0 || lambda2 < 0) stop("Lambda parameters must be non-negative")
-  if (alpha < 0 || alpha > 1) stop("Alpha must be in [0,1]")
+  if (lambda1 < 0 || lambda2 < 0 || lambda3 < 0) {
+    stop("Lambda parameters must be non-negative")
+  }
   penalty <- match.arg(penalty, choices = c("lasso", "MCP", "SCAD"))
   if (!missing(init) && length(init) > 0) {
     if (length(init) != n_features * (n_groups + 1)) {
@@ -194,10 +195,10 @@ coxtrans <- function(
       eta[sparse_idx], vartheta, penalty, lambda1, gamma
     )
     eta[global_idx] <- threshold_prox(
-      eta[global_idx], vartheta, penalty, lambda2 * (1 - alpha), gamma
+      eta[global_idx], vartheta, penalty, lambda2, gamma
     )
     eta[local_idx] <- threshold_prox(
-      eta[local_idx], vartheta, penalty, lambda2 * alpha, gamma
+      eta[local_idx], vartheta, penalty, lambda3, gamma
     )
     mu <- mu + vartheta * contr_sum %*% theta
     nu <- nu + vartheta * (contr_penalty %*% theta - eta)
@@ -262,8 +263,8 @@ coxtrans <- function(
 
     eta_ <- contr_penalty %*% theta
     loss_penalty <- penalty(eta_[sparse_idx], penalty, lambda1, gamma) +
-      penalty(eta_[global_idx], penalty, lambda2 * (1 - alpha), gamma) +
-      penalty(eta_[local_idx], penalty, lambda2 * alpha, gamma)
+      penalty(eta_[global_idx], penalty, lambda2, gamma) +
+      penalty(eta_[local_idx], penalty, lambda3, gamma)
     loss_penalty <- loss_penalty * n_samples_total
     loss_total <- loss - loss_penalty
 
@@ -340,7 +341,7 @@ coxtrans <- function(
     penalty = penalty,
     lambda1 = lambda1,
     lambda2 = lambda2,
-    alpha = alpha,
+    lambda3 = lambda3,
     gamma = gamma,
     formula = formula,
     call = match.call(),
