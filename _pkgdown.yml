@@ -14,6 +14,7 @@ reference:
   - vcov.coxtrans
   - summary.coxtrans
   - print.summary.coxtrans
+  - diagnose.coxtrans
 - title: "Prediction"
   contents:
   - basehaz.coxtrans
@@ -30,7 +31,11 @@ reference:
   - vcov.ncvcox
   - summary.ncvcox
   - print.summary.ncvcox
+  - predict.ncvcox
   - basehaz.ncvcox
+  - diagnose
+  - penalty
+  - preprocess
 - title: "Data Sets"
   contents:
   - sim2
