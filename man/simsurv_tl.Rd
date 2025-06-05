@@ -45,5 +45,5 @@ dist <- c("gompertz", "weibull")
 maxt <- 3
 n_samples <- 100
 df <- simsurv_tl(beta, eta, lambda, gamma, dist, maxt, n_samples)
-head(df)
+df
 }

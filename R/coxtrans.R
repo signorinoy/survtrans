@@ -231,14 +231,14 @@ coxtrans <- function(
     # Check the convergence
     if (n_iterations >= control$maxit) {
       convergence <- TRUE
-      message <- paste0(
-        "Maximum number of iterations reached (", control$maxit, ")."
+      message <- stringr::str_glue(
+        "Maximum number of iterations reached ({control$maxit})."
       )
     }
     if (r_norm < eps_pri && s_norm < eps_dual) {
       convergence <- TRUE
-      message <- paste0(
-        "Convergence reached at iteration ", n_iterations, "."
+      message <- stringr::str_glue(
+        "Convergence reached at iteration {n_iterations}."
       )
     }
 
@@ -255,9 +255,9 @@ coxtrans <- function(
     loss <- sum(status_tilde * (offset - log(risk_set)))
     if (loss / null_deviance < 0.01) {
       convergence <- TRUE
-      message <- paste0(
-        "The log-likelihood is too small (", loss / null_deviance,
-        "). Stopping the algorithm."
+      message <- stringr::str_glue(
+        "The log-likelihood is too small ({loss / null_deviance}). ",
+        "Stopping the algorithm."
       )
     }
 
@@ -269,17 +269,26 @@ coxtrans <- function(
     loss_total <- loss - loss_penalty
 
     if (control$verbose) {
-      cat(
-        "========================================\n",
-        sprintf("Iteration Number       : %d", n_iterations), "\n",
-        sprintf("Residuals (pri, dual)  : %.4f, %.4f", r_norm, s_norm), "\n",
-        sprintf("Epsilon (pri, dual)    : %.4f, %.4f", eps_pri, eps_dual), "\n",
-        sprintf("Augmented Parameter    : %.4f", vartheta), "\n",
-        sprintf("Total Loss             : %.4f", loss_total), "\n",
-        sprintf(" - Log Likelihood      : %.4f", loss), "\n",
-        sprintf(" - Penalty             : %.4f", loss_penalty), "\n",
-        "========================================\n"
-      )
+      cli::cli_h2("Iteration Info")
+      cli::cli_text("Iteration       : {.val {n_iterations}}")
+
+      cli::cli_h2("Residuals")
+      cli::cli_text(stringr::str_glue(
+        "Primal Residual : {r_norm}  (Tol: {eps_pri})"
+      ))
+      cli::cli_text(stringr::str_glue(
+        "Dual Residual   : {s_norm}  (Tol: {eps_dual})"
+      ))
+
+      cli::cli_h2("Optimization Parameters")
+      cli::cli_text(stringr::str_glue("Augmented Param : {vartheta}"))
+
+      cli::cli_h2("Loss Summary")
+      cli::cli_text(stringr::str_glue("Total Loss      : {loss_total}"))
+      cli::cli_text(stringr::str_glue("     - LogLik       : {loss}"))
+      cli::cli_text(stringr::str_glue("     - Penalty      : {loss_penalty}"))
+
+      cli::cli_rule()
     }
     history[n_iterations, ] <- c(
       n_iterations, r_norm, s_norm, eps_pri, eps_dual, vartheta,
@@ -330,6 +339,9 @@ coxtrans <- function(
     "Penalty.Term", "Total.Loss"
   )
   history <- history[seq_len(n_iterations), ]
+
+  coefficients <- sweep(coefficients, 1, x_scale, "/")
+  x <- sweep(x, 2, x_scale, "*")
 
   # Return the fitted model
   fit <- list(
@@ -486,38 +498,33 @@ diagnose.coxtrans <- function(object, ...) {
 #' coefficients belong. Zero coefficients are removed.
 #' @export
 coef.coxtrans <- function(object, ...) {
-  # Properties of the coxtrans object
   coefficients <- object$coefficients
+  n_groups <- ncol(coefficients) - 1L
   n_features <- nrow(coefficients)
-  n_groups <- ncol(coefficients) - 1
+  beta <- coefficients[, 1:n_groups, drop = FALSE] +
+    coefficients[, n_groups + 1L]
 
-  eta <- coefficients[, 1:n_groups]
-  beta <- coefficients[, (n_groups + 1)]
+  phi_list <- lapply(
+    seq_len(n_features),
+    function(j) unique(beta[j, ])
+  )
 
-  group_names <- colnames(eta)
-  variable_names <- colnames(object$x)
-
-  # Generate the coefficients and names for each feature
-  coef <- numeric()
-  coef_names <- character()
-  for (j in seq_len(n_features)) {
-    feature_groups <- as.factor(eta[j, ])
-    feature_levels <- unique(as.character(feature_groups))
-    coef_postfix <- sapply(feature_levels, function(level) {
-      idx <- feature_groups == level
-      ifelse(
-        sum(idx) == n_groups,
-        "ALL", paste0(group_names[idx], collapse = ", ")
-      )
-    })
-    coef_names <- c(
-      coef_names, paste0(variable_names[j], " (", coef_postfix, ")")
-    )
-    coef <- c(coef, as.numeric(feature_levels) + beta[j])
-  }
-  names(coef) <- coef_names
-  coef <- coef[abs(coef) > object$control$abstol]
-  coef
+  is_global <- coefficients[, 1] == 0
+  psi_list <- lapply(seq_len(n_features), function(j) {
+    vals <- phi_list[[j]]
+    if (is_global[j] && length(vals) > 1) vals[-1] else vals
+  })
+  psi <- unlist(psi_list)
+  names(psi) <- unlist(lapply(seq_along(psi_list), function(j) {
+    vals <- psi_list[[j]]
+    if (is_global[j] && length(vals) > 1) {
+      idx <- seq_along(vals) + 1
+    } else {
+      idx <- seq_along(vals)
+    }
+    stringr::str_c(rownames(coefficients)[j], idx, sep = ".")
+  }))
+  psi
 }
 
 #' Variance-covariance matrix for a \code{coxtrans} object.
@@ -527,131 +534,49 @@ coef.coxtrans <- function(object, ...) {
 #' coefficients.
 #' @export
 vcov.coxtrans <- function(object, ...) {
-  # Properties of the coxtrans object
   time <- object$time
   status <- object$status
   group <- object$group
   x <- object$x
-  n_samples_total <- nrow(x)
-  n_features <- ncol(x)
+
+  n_samples <- nrow(x)
   group_levels <- levels(group)
   n_groups <- length(group_levels)
   group_idxs <- lapply(group_levels, function(g) which(group == g))
-  n_samples_group <- sapply(group_idxs, length)
+
   coefficients <- object$coefficients
 
-  # Extract the coefficients from the object
-  eta <- coefficients[, 1:n_groups]
-  beta <- coefficients[, (n_groups + 1)]
+  psi <- coef(object)
+  link_matrix <- build_link_matrix(coefficients)
 
-  # Reassign the coefficients' group and track expanded coefficients
-  eta_expanded <- numeric()
-  coefs_processed <- numeric()
-  eta_idx <- matrix(0, n_features, n_groups)
-  n_total_groups <- 0
-  for (j in seq_len(n_features)) {
-    feature_groups <- as.factor(eta[j, ])
-    feature_levels <- unique(as.character(feature_groups))
-    for (k in seq_along(feature_levels)) {
-      if (feature_levels[k] == "0") next
-      idx <- feature_groups == feature_levels[k]
-      eta_idx[j, idx] <- k + n_total_groups
-    }
-    eta_expanded <- c(eta_expanded, as.numeric(feature_levels))
-    coefs_processed <- c(coefs_processed, as.numeric(feature_levels) + beta[j])
-    n_total_groups <- n_total_groups + length(feature_levels)
-  }
-  coefs_expanded <- c(eta_expanded, beta)
-
-  # Check if there are non-zero coefficients
-  n_expanded_nonzero <- sum(coefs_expanded != 0)
-  n_processed_nonzero <- sum(abs(coefs_processed) > object$control$abstol)
-  if (n_expanded_nonzero == 0 || n_processed_nonzero == 0) {
-    stop("No non-zero coefficients to compute the variance-covariance matrix")
-  }
-
-  # Group the samples according to the estimated coefficients' group
-  x <- cbind(
-    do.call(rbind, lapply(seq_len(n_groups), function(k) {
-      # Construct the feature map for each group
-      feature_map <- matrix(0, nrow = n_features, ncol = n_total_groups)
-      for (j in seq_len(n_features)) {
-        feature_map[j, eta_idx[j, k]] <- 1
-      }
-      x[group_idxs[[k]], ] %*% feature_map
-    })),
-    do.call(rbind, lapply(group_idxs, function(idx) x[idx, ]))
-  )
+  z <- Matrix::bdiag(lapply(group_idxs, function(idx) x[idx, ])) %*% link_matrix
   time <- unlist(lapply(group_idxs, function(idx) time[idx]))
   status <- unlist(lapply(group_idxs, function(idx) status[idx]))
 
-  # Select the non-zero coefficients and corresponding variables
-  coefs <- coefs_expanded[coefs_expanded != 0]
-  x <- x[, coefs_expanded != 0]
-  from <- sort(unique(c(eta_idx)))
-  to <- seq_len(length(from)) - 1
-  eta_idx <- apply(eta_idx, c(1, 2), function(e) to[match(e, from)])
+  is_nonzero <- as.vector(psi) != 0
+  n_nonzero <- sum(is_nonzero)
+  z1 <- as.matrix(z[, is_nonzero, drop = FALSE])
+  psi1 <- psi[is_nonzero]
+  lp <- z1 %*% psi1
 
-  # Calculate the gradient and Hessian for the non-zero coefficients
-  lp <- x %*% coefs
-  gradients <- matrix(0, nrow = n_samples_total, ncol = n_expanded_nonzero)
-  hessians <- matrix(0, nrow = n_samples_total, ncol = n_expanded_nonzero^2)
+  gradients <- matrix(0, nrow = n_samples, ncol = n_nonzero)
+  hessians <- matrix(0, nrow = n_samples, ncol = n_nonzero^2)
   n_passes <- 0
   for (k in seq_len(n_groups)) {
     idx <- n_passes + seq_len(length(group_idxs[[k]]))
     n_passes <- n_passes + length(idx)
-    ghs <- calc_grad_hess(lp[idx], x[idx, ], time[idx], status[idx])
+    ghs <- calc_grad_hess(lp[idx], z1[idx, ], time[idx], status[idx])
     gradients[idx, ] <- ghs$grad
     hessians[idx, ] <- ghs$hess
   }
-  hess <- matrix(colSums(hessians), n_expanded_nonzero, n_expanded_nonzero)
-  cov_grad <- stats::cov(gradients) * n_samples_total
-
-  # Construct the Null space of the constraints
-  n_constr <- sum(rowSums(eta_idx != 0) > 0)
-  if (n_constr > 0) {
-    constr_idx <- which(rowSums(eta_idx != 0) > 0)
-    constr <- matrix(0, nrow = n_constr, ncol = sum(coefs_expanded != 0))
-    for (i in seq_len(n_constr)) {
-      idx <- constr_idx[i]
-      group_levels <- unique(eta_idx[idx, ])
-      group_levels <- group_levels[group_levels != 0]
-      constr[i, group_levels] <- sapply(
-        group_levels,
-        function(level) sum((eta_idx[idx, ] == level) * n_samples_group)
-      ) / n_samples_total
-    }
-    null_constr <- MASS::Null(t(constr))
-    hess_inv <- null_constr %*%
-      solve(t(null_constr) %*% hess %*% null_constr) %*% t(null_constr)
-    vcov_constr <- hess_inv %*% cov_grad %*% hess_inv
-  } else {
-    hess_inv <- solve(hess)
-    vcov_constr <- hess_inv %*% cov_grad %*% hess_inv
-  }
-
-  # Construct the variance-covariance matrix for the original coefficients
-  prox_origional <- matrix(0, n_expanded_nonzero, n_processed_nonzero)
-  beta_idx <- cumsum(beta != 0) + sum(eta_expanded != 0)
-  beta_idx[beta == 0] <- 0
-  j <- 1
-  for (i in seq_len(n_features)) {
-    idx1 <- unique(eta_idx[i, ])
-    idx2 <- beta_idx[i]
-    if (any(idx1 != 0) || idx2 != 0) {
-      for (idx in idx1) {
-        if (
-          (idx != 0) && (abs(coefs[idx] + coefs[idx2]) < object$control$abstol)
-        ) {
-          next
-        }
-        prox_origional[idx, j] <- 1
-        prox_origional[idx2, j] <- 1
-        j <- j + 1
-      }
-    }
-  }
-  t(prox_origional) %*% vcov_constr %*% prox_origional
+  hess <- matrix(colSums(hessians), n_nonzero, n_nonzero)
+  hess_inv <- solve(hess)
+  grad_cov <- crossprod(gradients)
+  vcov <- hess_inv %*% grad_cov %*% hess_inv
+  dimnames(vcov) <- list(
+    names(psi1), names(psi1)
+  )
+  vcov
 }
 
 
@@ -708,26 +633,8 @@ BIC.coxtrans <- function(object, type = c("traditional", "modified"), ...) {
   n_samples <- nrow(object$x)
   n_features <- nrow(coefficients)
   n_groups <- ncol(coefficients) - 1
+  n_parameters <- length(coef(object))
 
-  # Number of active constraints
-  eta_group <- matrix(0, n_features, n_groups)
-  for (j in seq_len(n_features)) {
-    feature_values <- coefficients[j, 1:n_groups]
-    feature_levels <- unique(feature_values)
-    for (k in seq_along(feature_levels)) {
-      eta_group[j, feature_values == feature_levels[k]] <- k
-    }
-  }
-  n_active_constraints <- sum(apply(eta_group, 1, function(row) {
-    length(unique(row)) > 1
-  }))
-
-  # The number of parameters should minus the number of active constraints
-  n_parameters <- sum(apply(coefficients, 1, function(coef_row) {
-    length(unique(coef_row[coef_row != 0]))
-  })) - n_active_constraints
-
-  # Log-likelihood of the model
   loglik <- logLik(object)
 
   # The parameter of the BIC
@@ -741,8 +648,8 @@ BIC.coxtrans <- function(object, type = c("traditional", "modified"), ...) {
 #' @param object An object of class \code{coxtrans}.
 #' @param conf.int A numeric value between 0 and 1 indicating the confidence
 #' level of the confidence interval. Default is 0.95.
-#' @param compressed Logical; if \code{TRUE}, the summary is compressed and
-#' only includes the group-level coefficients. Default is \code{TRUE}.
+#' @param target_only Logical; if \code{TRUE}, only the coefficients for the
+#' target group are shown in the summary. Default is \code{TRUE}.
 #' @param ... Additional arguments (not used).
 #'
 #' @return An object of class \code{summary.coxtrans}, with the following
@@ -758,23 +665,34 @@ BIC.coxtrans <- function(object, type = c("traditional", "modified"), ...) {
 #' the confidence limits for exp(coef).}
 #'
 #' @export
-summary.coxtrans <- function(object, conf.int = 0.95, compressed = TRUE, ...) {
+summary.coxtrans <- function(object, conf.int = 0.95, target_only = TRUE, ...) {
   # Extract necessary components from the object
   n_samples <- nrow(object$x)
   n_events <- sum(object$status)
   loglik <- logLik(object)
   bic_value <- BIC(object)
-  group_levels <- levels(object$group)
-  variable_names <- colnames(object$x)
 
   # Standard errors
   vcov_matrix <- vcov(object)
   if (is.null(vcov_matrix)) {
     stop("Variance-covariance matrix is not available.")
   }
-  se <- sqrt(diag(vcov_matrix))
 
   coefficients <- coef(object)
+  is_nonzero <- coefficients != 0
+  coefficients <- coefficients[is_nonzero]
+  if (target_only) {
+    n_features <- nrow(object$coefficients)
+    link_matrix <- as.matrix(build_link_matrix(object$coefficients)[
+      seq_len(n_features), is_nonzero,
+      drop = FALSE
+    ])
+    coefficients <- as.vector(link_matrix %*% coefficients)
+    vcov_matrix <- link_matrix %*% vcov_matrix %*% t(link_matrix)
+    names(coefficients) <- rownames(object$coefficients)
+  }
+
+  se <- sqrt(diag(vcov_matrix))
   z_scores <- coefficients / se
   p_values <- stats::pchisq(z_scores^2, 1, lower.tail = FALSE)
   coef_matrix <- cbind(
@@ -792,71 +710,10 @@ summary.coxtrans <- function(object, conf.int = 0.95, compressed = TRUE, ...) {
   dimnames(conf_int_matrix) <- list(
     names(coefficients), c(
       "exp(coef)", "exp(-coef)",
-      paste("lower .", round(100 * conf.int, 2), sep = ""),
-      paste("upper .", round(100 * conf.int, 2), sep = "")
+      stringr::str_c("lower .", round(100 * conf.int, 2)),
+      stringr::str_c("upper .", round(100 * conf.int, 2), sep = "")
     )
   )
-
-  if (!compressed) {
-    coef_matrix_extract <- matrix(nrow = 0, ncol = ncol(coef_matrix))
-    conf_int_matrix_extract <- matrix(nrow = 0, ncol = ncol(conf_int_matrix))
-    coef_groups <- c()
-    coef_variables <- c()
-    coef_names <- rownames(coef_matrix)
-
-    extract_var_group <- function(coef_name) {
-      variable_name <- trimws(stringr::str_extract(coef_name, "^[^\\(]+"))
-      group_names <- stringr::str_extract(coef_name, "\\(([^)]+)\\)")
-      group_names <- gsub("[()]", "", trimws(group_names))
-      group_names_split <- stringr::str_split(group_names, ", ")[[1]]
-      if ("ALL" %in% group_names_split) {
-        group_names_split <- group_levels
-      }
-      list(variable = variable_name, groups = group_names_split)
-    }
-
-    for (i in seq_along(coef_names)) {
-      var_group_info <- extract_var_group(coef_names[i])
-      variable_name <- var_group_info$variable
-      group_names <- var_group_info$groups
-      for (group_name in group_names) {
-        coef_groups <- c(coef_groups, trimws(group_name))
-        coef_variables <- c(coef_variables, variable_name)
-        coef_matrix_extract <- rbind(
-          coef_matrix_extract, coef_matrix[i, , drop = FALSE]
-        )
-        conf_int_matrix_extract <- rbind(
-          conf_int_matrix_extract, conf_int_matrix[i, , drop = FALSE]
-        )
-      }
-    }
-
-    coef_names <- paste0(coef_groups, " ", coef_variables)
-    all_combinations <- expand.grid(group_levels, variable_names)
-    all_combinations <- apply(all_combinations, 1, paste, collapse = " ")
-    missing_names <- setdiff(all_combinations, coef_names)
-
-    if (length(missing_names) > 0) {
-      for (name in missing_names) {
-        coef_matrix_extract <- rbind(coef_matrix_extract, c(0, 1, NA, NA, NA))
-        conf_int_matrix_extract <- rbind(
-          conf_int_matrix_extract, c(1, 1, NA, NA)
-        )
-        coef_names <- c(coef_names, name)
-      }
-    }
-
-    coef_names_split <- do.call(rbind, stringr::str_split(coef_names, " "))
-    coef_names_df <- as.data.frame(coef_names_split)
-    coef_names_df[, 1] <- factor(coef_names_df[, 1], levels = group_levels)
-    coef_order <- order(coef_names_df[, 1])
-    coef_names <- apply(coef_names_df[coef_order, ], 1, paste, collapse = " ")
-
-    coef_matrix <- coef_matrix_extract[coef_order, ]
-    conf_int_matrix <- conf_int_matrix_extract[coef_order, ]
-    rownames(coef_matrix) <- coef_names
-    rownames(conf_int_matrix) <- coef_names
-  }
 
   # Create a summary list
   summary_list <- list(
@@ -913,14 +770,19 @@ print.summary.coxtrans <- function(
   # Print number of samples and events
   cat("  n=", x$n, ", number of events=", x$nevent, "\n\n", sep = "")
 
+  is_nonzero <- x$coefficients[, "coef"] != 0
+
   # Print coefficients with formatted output
-  stats::printCoefmat(x$coefficients,
+  stats::printCoefmat(x$coefficients[is_nonzero, , drop = FALSE],
     digits = digits, signif.stars = signif.stars,
     cs.ind = 1:3, tst.ind = 4, P.values = TRUE, has.Pvalue = TRUE
   )
 
   # Print confidence intervals
-  print(format(x$conf.int, digits = digits), quote = FALSE)
+  print(
+    format(x$conf.int[is_nonzero, , drop = FALSE], digits = digits),
+    quote = FALSE
+  )
 
   invisible(x)
 }

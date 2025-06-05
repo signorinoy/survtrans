@@ -26,6 +26,7 @@ Imports:
     stringr,
     survival
 Suggests: 
+    devtools,
     ggplot2,
     grid,
     knitr,

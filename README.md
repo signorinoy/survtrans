@@ -14,14 +14,14 @@ status](https://www.r-pkg.org/badges/version/survtrans)](https://CRAN.R-project.
 coverage](https://codecov.io/gh/SignorinoY/survtrans/graph/badge.svg)](https://app.codecov.io/gh/SignorinoY/survtrans)
 <!-- badges: end -->
 
-The goal of survtrans is to provide a framework for transferring
-survival information from source domain(s) to target domain. The package
-now only supports the Cox proportional hazards model with global and
-local transfer learning.
+The goal of **survtrans** is to provide a framework for transferring
+survival information from source domain(s) to a target domain. The
+package currently supports the Cox proportional hazards model with both
+global and local transfer learning.
 
 ## Installation
 
-You can install the development version of survtrans like so:
+You can install the development version of **survtrans** with:
 
 ``` r
 # install.packages("pak")
@@ -30,9 +30,9 @@ pak::pak("SignorinoY/survtrans")
 
 ## Example
 
-This is a basic example which shows you how to transfer survival
-information from multiple source domains to a target domain using the
-Cox proportional hazards model:
+This is a basic example showing how to transfer survival information
+from multiple source domains to a target domain using the Cox
+proportional hazards model:
 
 ``` r
 library(survtrans)
@@ -49,39 +49,22 @@ summary(fit)
 #> 
 #>   n=500, number of events=422
 #> 
-#>              coef exp(coef) se(coef)      z Pr(>|z|)    
-#> X1 (1)    0.34638   1.41394  0.05332  6.497 8.20e-11 ***
-#> X1 (2)    0.93371   2.54394  0.10765  8.673  < 2e-16 ***
-#> X1 (3)   -0.28992   0.74832  0.10673 -2.716   0.0066 ** 
-#> X1 (4)    0.95170   2.59011  0.15661  6.077 1.22e-09 ***
-#> X1 (5)   -0.21037   0.81028  0.09827 -2.141   0.0323 *  
-#> X2 (1)    0.36122   1.43508  0.05483  6.588 4.46e-11 ***
-#> X2 (2)    0.97637   2.65481  0.11734  8.321  < 2e-16 ***
-#> X2 (3)   -0.24155   0.78541  0.11991 -2.014   0.0440 *  
-#> X2 (4)    0.97474   2.65048  0.13296  7.331 2.29e-13 ***
-#> X2 (5)   -0.26555   0.76678  0.11850 -2.241   0.0250 *  
-#> X3 (ALL)  0.35856   1.43127  0.05650  6.347 2.20e-10 ***
-#> X4 (ALL)  0.35181   1.42163  0.05574  6.312 2.76e-10 ***
-#> X13 (4)   0.01383   1.01393  0.13008  0.106   0.9153    
+#>       coef exp(coef) se(coef)     z Pr(>|z|)    
+#> X1 0.35052   1.41981  0.05366 6.533 6.47e-11 ***
+#> X2 0.35914   1.43209  0.05424 6.621 3.56e-11 ***
+#> X3 0.34485   1.41178  0.05431 6.350 2.15e-10 ***
+#> X4 0.32870   1.38916  0.05190 6.333 2.40e-10 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#>          exp(coef) exp(-coef) lower .95 upper .95
-#> X1 (1)   1.4139    0.7072     1.2736    1.5697   
-#> X1 (2)   2.5439    0.3931     2.0600    3.1415   
-#> X1 (3)   0.7483    1.3363     0.6071    0.9224   
-#> X1 (4)   2.5901    0.3861     1.9055    3.5207   
-#> X1 (5)   0.8103    1.2341     0.6683    0.9824   
-#> X2 (1)   1.4351    0.6968     1.2889    1.5979   
-#> X2 (2)   2.6548    0.3767     2.1094    3.3413   
-#> X2 (3)   0.7854    1.2732     0.6209    0.9935   
-#> X2 (4)   2.6505    0.3773     2.0424    3.4396   
-#> X2 (5)   0.7668    1.3042     0.6079    0.9673   
-#> X3 (ALL) 1.4313    0.6987     1.2812    1.5989   
-#> X4 (ALL) 1.4216    0.7034     1.2745    1.5857   
-#> X13 (4)  1.0139    0.9863     0.7857    1.3084
+#>    exp(coef) exp(-coef) lower .95 upper .95
+#> X1 1.4198    0.7043     1.2781    1.5773   
+#> X2 1.4321    0.6983     1.2877    1.5927   
+#> X3 1.4118    0.7083     1.2692    1.5703   
+#> X4 1.3892    0.7199     1.2548    1.5379
 ```
 
-We can also give the estimated cumulative hazard function as follows:
+You can also plot the estimated cumulative baseline hazard function and
+compare it to the true function:
 
 ``` r
 library(ggplot2)

@@ -22,11 +22,11 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/SignorinoY/survtrans/graph/badge.svg)](https://app.codecov.io/gh/SignorinoY/survtrans)
 <!-- badges: end -->
 
-The goal of survtrans is to provide a framework for transferring survival information from source domain(s) to target domain. The package now only supports the Cox proportional hazards model with global and local transfer learning.
+The goal of **survtrans** is to provide a framework for transferring survival information from source domain(s) to a target domain. The package currently supports the Cox proportional hazards model with both global and local transfer learning.
 
 ## Installation
 
-You can install the development version of survtrans like so:
+You can install the development version of **survtrans** with:
 
 ```{r, eval = FALSE}
 # install.packages("pak")
@@ -35,7 +35,7 @@ pak::pak("SignorinoY/survtrans")
 
 ## Example
 
-This is a basic example which shows you how to transfer survival information from multiple source domains to a target domain using the Cox proportional hazards model:
+This is a basic example showing how to transfer survival information from multiple source domains to a target domain using the Cox proportional hazards model:
 
 ```{r example}
 library(survtrans)
@@ -47,7 +47,8 @@ fit <- coxtrans(
 summary(fit)
 ```
 
-We can also give the estimated cumulative hazard function as follows:
+You can also plot the estimated cumulative baseline hazard function and compare it to the true function:
+
 ```{r, basehaz, fig.alt = "Estimated vs. True Cumulative Baseline Hazard Function"}
 library(ggplot2)
 basehaz_pred <- basehaz(fit)

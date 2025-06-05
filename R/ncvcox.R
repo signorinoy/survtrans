@@ -142,19 +142,19 @@ ncvcox <- function(
     }
     if (n_iterations >= control$maxit) {
       convergence <- TRUE
-      message <- paste0(
+      message <- stringr::str_glue(
         "Maximum number of iterations reached (", control$maxit, ")."
       )
     }
     if (max(abs(beta - beta_prev)) <= control$abstol) {
       convergence <- TRUE
-      message <- paste0(
+      message <- stringr::str_glue(
         "Convergence reached at iteration ", n_iterations, "."
       )
     }
     if (loss / null_deviance < 0.01) {
       convergence <- TRUE
-      message <- paste0(
+      message <- stringr::str_glue(
         "The log-likelihood is too small (", loss / null_deviance,
         "). Stopping the algorithm."
       )
@@ -353,8 +353,8 @@ summary.ncvcox <- function(object, conf.int = 0.95, compressed = TRUE, ...) {
   dimnames(conf_int_matrix) <- list(
     names(coefficients), c(
       "exp(coef)", "exp(-coef)",
-      paste("lower .", round(100 * conf.int, 2), sep = ""),
-      paste("upper .", round(100 * conf.int, 2), sep = "")
+      stringr::str_c("lower .", round(100 * conf.int, 2), sep = ""),
+      stringr::str_c("upper .", round(100 * conf.int, 2), sep = "")
     )
   )
 

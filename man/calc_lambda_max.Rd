@@ -9,7 +9,7 @@ calc_lambda_max(formula, data, group, offset)
 \arguments{
 \item{formula}{A formula expression for regression models, in the form
 \code{response ~ predictors}. The response must be a survival object as
-returned by the \code{\link{Surv}} function.}
+returned by the \link[survival]{Surv} function.}
 
 \item{data}{A data frame containing the variables in the model.}
 

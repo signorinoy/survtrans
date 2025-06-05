@@ -127,8 +127,11 @@ penalty <- function(x, penalty, lambda, gamma) {
       condition2 <- x_abs > lambda & x_abs <= gamma * lambda
       sum(lambda * x_abs[condition1]) +
         sum(
-          (2 * gamma * lambda * x_abs[condition2]
-            - x_abs[condition2]^2 - lambda^2) / (2 * (gamma - 1))
+          (
+            2 * gamma * lambda * x_abs[condition2] -
+              x_abs[condition2]^2 -
+              lambda^2
+          ) / (2 * (gamma - 1))
         ) +
         sum(0.5 * (gamma + 1) * lambda^2 * (!condition1 & !condition2))
     },
@@ -140,7 +143,7 @@ penalty <- function(x, penalty, lambda, gamma) {
 #'
 #' @param formula A formula expression for regression models, in the form
 #' \code{response ~ predictors}. The response must be a survival object as
-#' returned by the \code{\link{Surv}} function.
+#' returned by the \link[survival]{Surv} function.
 #' @param data A data frame containing the variables in the model.
 #' @param group A factor specifying the group of each sample.
 #' @param offset A numeric vector specifying the offset.
@@ -175,6 +178,7 @@ calc_lambda_max <- function(formula, data, group, offset) {
   lambda_max <- max(lambdas_max, na.rm = TRUE)
   lambda_max
 }
+
 #' Simulate survival data for a multi-source Cox model
 #'
 #' @param beta A vector of length p representing the common coefficients,
@@ -206,13 +210,13 @@ calc_lambda_max <- function(formula, data, group, offset) {
 #' maxt <- 3
 #' n_samples <- 100
 #' df <- simsurv_tl(beta, eta, lambda, gamma, dist, maxt, n_samples)
-#' head(df)
+#' df
 simsurv_tl <- function(
     beta, eta, lambda, gamma, dist, maxt, n_samples, seed = 0) {
   set.seed(seed)
   n_groups <- ncol(eta)
   n_features <- nrow(eta)
-  names(beta) <- paste0("X", 1:n_features)
+  names(beta) <- stringr::str_c("X", seq_len(n_features))
   if (length(n_samples) == 1) n_samples <- rep(n_samples, n_groups)
   mu <- rep(0, n_features)
   sigma <- diag(n_features)
@@ -236,4 +240,61 @@ simsurv_tl <- function(
   names(df)[names(df) == "eventtime"] <- "time"
   df$id <- seq_len(nrow(df))
   df
+}
+
+#' @importFrom utils head
+build_link_matrix <- function(coefficients) {
+  stopifnot(is.matrix(coefficients), ncol(coefficients) >= 2)
+  n_groups <- ncol(coefficients) - 1L
+  n_features <- nrow(coefficients)
+  beta <- coefficients[, 1:n_groups, drop = FALSE] +
+    coefficients[, n_groups + 1L]
+
+  phi_list <- lapply(
+    seq_len(n_features),
+    function(j) unique(beta[j, ])
+  )
+  n_unique <- lengths(phi_list)
+  n_phi_total <- sum(n_unique)
+
+  is_global <- coefficients[, 1L] == 0
+  offsets <- c(0L, head(cumsum(n_unique), -1L))
+
+  total_nz <- n_groups * n_features
+  i_idx <- integer(total_nz)
+  j_idx <- integer(total_nz)
+  ctr <- 1L
+
+  for (k in seq_len(n_groups)) {
+    for (j in seq_len(n_features)) {
+      i_idx[ctr] <- (k - 1L) * n_features + j
+      pos <- match(beta[j, k], phi_list[[j]])
+      j_idx[ctr] <- offsets[j] + pos
+      ctr <- ctr + 1L
+    }
+  }
+  link_local <- Matrix::sparseMatrix(
+    i = i_idx,
+    j = j_idx,
+    x = rep(1L, total_nz),
+    dims = c(
+      n_groups * n_features,
+      n_phi_total
+    )
+  )
+
+  link_global_blocks <- lapply(seq_len(n_features), function(j) {
+    m <- n_unique[j]
+    if (is_global[j] && m > 1L) {
+      rbind(
+        rep(1 / (m - 1L), m - 1L),
+        diag(m - 1L)
+      )
+    } else {
+      diag(m)
+    }
+  })
+  link_global <- Matrix::bdiag(link_global_blocks)
+
+  link_local %*% link_global
 }

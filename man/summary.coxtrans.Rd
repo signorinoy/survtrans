@@ -4,7 +4,7 @@
 \alias{summary.coxtrans}
 \title{Summary method for a \code{coxtrans} object}
 \usage{
-\method{summary}{coxtrans}(object, conf.int = 0.95, compressed = TRUE, ...)
+\method{summary}{coxtrans}(object, conf.int = 0.95, target_only = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class \code{coxtrans}.}
@@ -12,8 +12,8 @@
 \item{conf.int}{A numeric value between 0 and 1 indicating the confidence
 level of the confidence interval. Default is 0.95.}
 
-\item{compressed}{Logical; if \code{TRUE}, the summary is compressed and
-only includes the group-level coefficients. Default is \code{TRUE}.}
+\item{target_only}{Logical; if \code{TRUE}, only the coefficients for the
+target group are shown in the summary. Default is \code{TRUE}.}
 
 \item{...}{Additional arguments (not used).}
 }
