@@ -32,6 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/reviews.html">A Review of Transfer Learning Approaches for Survival Analysis</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -50,11 +56,11 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of survtrans is to provide a framework for transferring survival information from source domain(s) to target domain. The package now only supports the Cox proportional hazards model with global and local transfer learning.</p>
+<p>The goal of <strong>survtrans</strong> is to provide a framework for transferring survival information from source domain(s) to a target domain. The package currently supports the Cox proportional hazards model with both global and local transfer learning.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of survtrans like so:</p>
+<p>You can install the development version of <strong>survtrans</strong> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"SignorinoY/survtrans"</span><span class="op">)</span></span></code></pre></div>
@@ -62,42 +68,35 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to transfer survival information from multiple source domains to a target domain using the Cox proportional hazards model:</p>
+<p>This is a basic example showing how to transfer survival information from multiple source domains to a target domain using the Cox proportional hazards model:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SignorinoY/survtrans" class="external-link">survtrans</a></span><span class="op">)</span></span>
 <span><span class="va">formula</span> <span class="op">&lt;-</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span> <span class="op">-</span> <span class="va">group</span> <span class="op">-</span> <span class="va">id</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/coxtrans.html">coxtrans</a></span><span class="op">(</span></span>
-<span>  <span class="va">formula</span>, <span class="va">sim2</span>, <span class="va">sim2</span><span class="op">$</span><span class="va">group</span>,</span>
-<span>  lambda1 <span class="op">=</span> <span class="fl">0.03</span>, lambda2 <span class="op">=</span> <span class="fl">0.01</span>, lambda3 <span class="op">=</span> <span class="fl">0.01</span>, penalty <span class="op">=</span> <span class="st">"SCAD"</span></span>
+<span>  <span class="va">formula</span>, <span class="va">sim2</span>, <span class="va">sim2</span><span class="op">$</span><span class="va">group</span>, <span class="fl">1</span>,</span>
+<span>  lambda1 <span class="op">=</span> <span class="fl">0.075</span>, lambda2 <span class="op">=</span> <span class="fl">0.04</span>, lambda3 <span class="op">=</span> <span class="fl">0.04</span>, penalty <span class="op">=</span> <span class="st">"SCAD"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; coxtrans(formula = formula, data = sim2, group = sim2$group, </span></span>
-<span><span class="co">#&gt;     lambda1 = 0.03, lambda2 = 0.01, lambda3 = 0.01, penalty = "SCAD")</span></span>
+<span><span class="co">#&gt;     target = 1, lambda1 = 0.075, lambda2 = 0.04, lambda3 = 0.04, </span></span>
+<span><span class="co">#&gt;     penalty = "SCAD")</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   n=500, number of events=422</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;               coef exp(coef) se(coef)      z Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; X1 (1)     0.34792   1.41612  0.05132  6.780 1.20e-11 ***</span></span>
-<span><span class="co">#&gt; X1 (2, 4)  0.94905   2.58324  0.08581 11.060  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; X1 (3, 5) -0.25320   0.77631  0.06876 -3.682 0.000231 ***</span></span>
-<span><span class="co">#&gt; X2 (1)     0.36097   1.43472  0.05384  6.704 2.03e-11 ***</span></span>
-<span><span class="co">#&gt; X2 (2, 4)  0.96453   2.62354  0.08501 11.345  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; X2 (3, 5) -0.24258   0.78460  0.08010 -3.029 0.002457 ** </span></span>
-<span><span class="co">#&gt; X3 (ALL)   0.34501   1.41200  0.05563  6.202 5.58e-10 ***</span></span>
-<span><span class="co">#&gt; X4 (ALL)   0.32763   1.38767  0.05372  6.099 1.07e-09 ***</span></span>
+<span><span class="co">#&gt;       coef exp(coef) se(coef)     z Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; X1 0.35052   1.41981  0.05366 6.533 6.47e-11 ***</span></span>
+<span><span class="co">#&gt; X2 0.35914   1.43209  0.05424 6.621 3.56e-11 ***</span></span>
+<span><span class="co">#&gt; X3 0.34485   1.41178  0.05431 6.350 2.15e-10 ***</span></span>
+<span><span class="co">#&gt; X4 0.32870   1.38916  0.05190 6.333 2.40e-10 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
-<span><span class="co">#&gt;           exp(coef) exp(-coef) lower .95 upper .95</span></span>
-<span><span class="co">#&gt; X1 (1)    1.4161    0.7062     1.2806    1.5660   </span></span>
-<span><span class="co">#&gt; X1 (2, 4) 2.5832    0.3871     2.1834    3.0564   </span></span>
-<span><span class="co">#&gt; X1 (3, 5) 0.7763    1.2881     0.6784    0.8883   </span></span>
-<span><span class="co">#&gt; X2 (1)    1.4347    0.6970     1.2910    1.5944   </span></span>
-<span><span class="co">#&gt; X2 (2, 4) 2.6235    0.3812     2.2209    3.0992   </span></span>
-<span><span class="co">#&gt; X2 (3, 5) 0.7846    1.2745     0.6706    0.9180   </span></span>
-<span><span class="co">#&gt; X3 (ALL)  1.4120    0.7082     1.2661    1.5747   </span></span>
-<span><span class="co">#&gt; X4 (ALL)  1.3877    0.7206     1.2490    1.5417</span></span></code></pre></div>
-<p>We can also give the estimated cumulative hazard function as follows:</p>
+<span><span class="co">#&gt;    exp(coef) exp(-coef) lower .95 upper .95</span></span>
+<span><span class="co">#&gt; X1 1.4198    0.7043     1.2781    1.5773   </span></span>
+<span><span class="co">#&gt; X2 1.4321    0.6983     1.2877    1.5927   </span></span>
+<span><span class="co">#&gt; X3 1.4118    0.7083     1.2692    1.5703   </span></span>
+<span><span class="co">#&gt; X4 1.3892    0.7199     1.2548    1.5379</span></span></code></pre></div>
+<p>You can also plot the estimated cumulative baseline hazard function and compare it to the true function:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">basehaz_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/basehaz.html">basehaz</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -169,7 +168,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Ziyang Gong <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0009-0001-4870-9102" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Ziyang Gong <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0009-0001-4870-9102" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -192,7 +191,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
