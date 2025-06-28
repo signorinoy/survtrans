@@ -303,6 +303,7 @@ coxtrans <- function(
     vartheta <- min(max(vartheta, 1e-3), 2.118034)
   }
 
+  theta <- qr.solve(contr_penalty, eta)
   eps <- norm(as.matrix(Matrix::crossprod(contr_penalty, eta - eta_old)), "I")
   eps_local <- norm(as.matrix(eta[local_idx] - eta_old[local_idx]), "I")
   flag_local <- matrix(abs(eta[local_idx]) <= eps_local, nrow = n_features)
